@@ -28,7 +28,7 @@ class Order(models.Model):
             self.business_user = self.offer_detail_id.offer.user
         
         if not self.title and self.offer_detail_id:
-            self.title = self.offer_detail_id.title
+            self.title = self.offer_detail_id.offer.title
         if self.offer_detail_id:
             detail = self.offer_detail_id
             self.revisions = self.revisions or detail.revisions

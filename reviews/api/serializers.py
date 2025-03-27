@@ -25,13 +25,13 @@ class ReviewsSerializer(serializers.ModelSerializer):
         reviewer = self.context['request'].user
 
         if not reviewer.is_authenticated:
-            raise serializers.ValidationError({'detail:' ["Sie müssen angemeldet sein, um eine Bewertung abgeben zu können"]})
+            raise serializers.ValidationError({'detail': ["Sie müssen angemeldet sein, um eine Bewertung abgeben zu können"]})
         
         if not reviewer.profile.type == 'customer':
-            raise serializers.ValidationError({'detail:' ["Nur User mit einem Kundenprofil können Bewertungen abgeben"]})
+            raise serializers.ValidationError({'detail': ["Nur User mit einem Kundenprofil können Bewertungen abgeben"]})
 
         if 'reviewer' in self.initial_data and int(self.initial_data['reviewer']) != reviewer.id:
-            raise serializers.ValidationError({'detail:' ["Sie können keine Bewertung im Namen eines anderen Users abgeben"]})
+            raise serializers.ValidationError({'detail': ["Sie können keine Bewertung im Namen eines anderen Users abgeben"]})
 
         business_user = data.get('business_user') or getattr(self.instance, 'business_user', None)
 

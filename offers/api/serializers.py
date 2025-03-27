@@ -235,6 +235,14 @@ class SingleFullOfferDetailSerializer(serializers.ModelSerializer):
         """
         Validiert eingebettete Angebotsdetails vor dem Update.
         """
+        allowed_fields = ['title', 'description', 'details']
+        incoming_fields = set(self.initial_data.keys())
+
+        invalid_fields = incoming_fields - set(allowed_fields)
+        if invalid_fields:
+            raise serializers.ValidationError({"detail": [f"Ungültige Felder: {', '.join(invalid_fields)}"]})
+
+
         details_data = self.initial_data.get('details', [])
         errors = []
         for detail in details_data:
