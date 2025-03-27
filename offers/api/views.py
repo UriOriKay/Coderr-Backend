@@ -1,7 +1,7 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import APIException
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from offers.models import Offer, OfferDetail
@@ -44,9 +44,9 @@ class OffersList(ListCreateAPIView):
     - GET: Auflisten aller Angebote mit optionalen Filtern (creator_id, Preis, Lieferzeit, Suche, Sortierung)
     - POST: Erstellen eines neuen Angebots (nur für Business-User)
     """
+    permission_classes = [IsAuthenticated]
     queryset = Offer.objects.annotate(min_price=Min('details__price'))
     serializer_class = OfferSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter]
     pagination_class = OfferPagination
     filterset_fields = ['user']
@@ -93,14 +93,26 @@ class OffersList(ListCreateAPIView):
 
         creator_id = params.get('creator_id')
         if creator_id:
+            try:
+                creator_id = int(creator_id)
+            except ValueError:
+                raise ValidationError({"detail": "creator_id muss eine ganze Zahl sein."})
             queryset = queryset.filter(user_id=creator_id)
 
         min_price = params.get('min_price')
         if min_price:
+            try:
+                min_price = float(min_price)
+            except ValueError:
+                raise ValidationError({"detail": "min_price muss eine Zahl sein."})
             queryset = queryset.filter(min_price__gte=min_price)
 
         max_delivery_time = params.get('max_delivery_time')
         if max_delivery_time:
+            try:
+                max_delivery_time = int(max_delivery_time)
+            except ValueError:
+                raise ValidationError({"detail": "max_delivery_time muss eine ganze Zahl sein."})
             queryset = queryset.filter(max_delivery_time__lte=max_delivery_time)
 
         return queryset
@@ -147,7 +159,7 @@ class OfferDetailsView(RetrieveUpdateDestroyAPIView):
         PATCH erlaubt nur Owner/Admin – ansonsten Standardrechte.
         """
         if self.request.method == 'PATCH':
-            return [IsOwnerOrAdmin()]
+            return [IsAuthenticated(), IsOwnerOrAdmin()]
         return super().get_permissions()
     
     def update(self, request, format=None, **kwargs):

@@ -103,7 +103,7 @@ class LoginView(APIView):
                 'username': serializer.validated_data['username'],
                 'email': serializer.validated_data['email'],
                 'token': serializer.validated_data['token']
-            }, status=status.HTTP_201_CREATED)
+            }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CustomerProfileList(APIView):

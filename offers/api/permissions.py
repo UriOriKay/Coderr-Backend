@@ -9,5 +9,8 @@ class IsOwnerOrAdmin(BasePermission):
     Wird typischerweise bei Angeboten (Offers) verwendet, um sicherzustellen,
     dass nur berechtigte Nutzer Inhalte bearbeiten oder löschen können.
     """
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
+
     def has_object_permission(self, request, view, obj):
         return request.user == obj.user or request.user.is_staff
