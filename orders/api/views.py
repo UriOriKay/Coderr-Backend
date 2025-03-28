@@ -37,7 +37,7 @@ class OrdersList(APIView):
         """
         serializer = OrdersPostSerializer(data=request.data)
         if self.request.user.profile.type != 'customer':
-            return Response({'details': ['Nur Kunden können Aufträge erteilen']},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'details': ['Nur Kunden können Aufträge erteilen']},status=status.HTTP_403_FORBIDDEN)
         if serializer.is_valid():
             order =serializer.save(customer_user=request.user.id)
             full_serializer = OrderListSerializer(order)

@@ -1,7 +1,7 @@
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import APIException
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from offers.models import Offer, OfferDetail
@@ -44,7 +44,8 @@ class OffersList(ListCreateAPIView):
     - GET: Auflisten aller Angebote mit optionalen Filtern (creator_id, Preis, Lieferzeit, Suche, Sortierung)
     - POST: Erstellen eines neuen Angebots (nur für Business-User)
     """
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     queryset = Offer.objects.annotate(min_price=Min('details__price'))
     serializer_class = OfferSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
@@ -131,8 +132,8 @@ class OffersList(ListCreateAPIView):
         - sonst: Standard
         """
         if self.request.method == 'POST':
-            return [IsOwnerOrAdmin()]
-        return super().get_permissions()
+            return [IsAuthenticated()]
+        return [AllowAny()]
 
     def perform_create(self, serializer):
         """
